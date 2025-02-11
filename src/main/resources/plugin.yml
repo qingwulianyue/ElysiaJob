@@ -1,0 +1,8 @@
+name: ElysiaJob
+version: '${project.version}'
+main: com.elysia.elysiajob.ElysiaJob
+commands:
+  ElysiaJob:
+    permission: admin
+    aliases:
+      - ej
