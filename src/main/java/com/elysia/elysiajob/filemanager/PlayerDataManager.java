@@ -2,8 +2,8 @@ package com.elysia.elysiajob.filemanager;
 
 import com.elysia.elysiajob.ElysiaJob;
 
-import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerDataManager {
     private PlayerDataManager(){}
@@ -11,23 +11,20 @@ public class PlayerDataManager {
     public static PlayerDataManager getInstance() {
         return instance;
     }
-    private final HashMap<UUID, Integer> playerMana = new HashMap<>();
-    private final HashMap<UUID, Integer> playerManaRegen = new HashMap<>();
-    private final HashMap<UUID, Integer> playerMaxMana = new HashMap<>();
+    // 使用线程安全的 ConcurrentHashMap
+    private final ConcurrentHashMap<UUID, Integer> playerMana = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Integer> playerManaRegen = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Integer> playerMaxMana = new ConcurrentHashMap<>();
     public Integer getPlayerMana(UUID uuid) {
-        if (!playerMana.containsKey(uuid))
-            playerMana.put(uuid, ElysiaJob.getConfigManager().getConfigData().getDefaultMana());
-        return playerMana.get(uuid);
+        return playerMana.computeIfAbsent(uuid, key -> ElysiaJob.getConfigManager().getConfigData().getDefaultMana());
     }
+
     public Integer getPlayerManaRegen(UUID uuid) {
-        if (!playerManaRegen.containsKey(uuid))
-            playerManaRegen.put(uuid, ElysiaJob.getConfigManager().getConfigData().getDefaultManaRegen());
-        return playerManaRegen.get(uuid);
+        return playerManaRegen.computeIfAbsent(uuid, key -> ElysiaJob.getConfigManager().getConfigData().getDefaultManaRegen());
     }
+
     public Integer getPlayerMaxMana(UUID uuid) {
-        if (!playerMaxMana.containsKey(uuid))
-            playerMaxMana.put(uuid, ElysiaJob.getConfigManager().getConfigData().getDefaultMana());
-        return playerMaxMana.get(uuid);
+        return playerMaxMana.computeIfAbsent(uuid, key -> ElysiaJob.getConfigManager().getConfigData().getDefaultMana());
     }
     public void setPlayerMana(UUID uuid, Integer mana) {
         playerMana.put(uuid, mana);

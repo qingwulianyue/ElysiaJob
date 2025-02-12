@@ -1,13 +1,16 @@
 package com.elysia.elysiajob;
 
 import com.elysia.elysiajob.command.CommandManager;
+import com.elysia.elysiajob.command.CommandTabComplete;
+import com.elysia.elysiajob.command.subcommands.HelpCommand;
+import com.elysia.elysiajob.command.subcommands.ReloadCommand;
+import com.elysia.elysiajob.command.subcommands.manacommands.*;
 import com.elysia.elysiajob.filemanager.ConfigManager;
 import com.elysia.elysiajob.filemanager.PlayerDataManager;
 import com.elysia.elysiajob.hook.PlaceholderAPIHook;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -16,7 +19,7 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 public final class ElysiaJob extends JavaPlugin {
-    private BukkitRunnable manaRegenerationTask;
+    private int manaRegenerationTaskId;
     private static ElysiaJob instance;
     public static ConfigManager configManager;
     public static PlayerDataManager playerDataManager;
@@ -38,15 +41,35 @@ public final class ElysiaJob extends JavaPlugin {
         playerDataManager = PlayerDataManager.getInstance();
         configManager.loadConfig();
         Bukkit.getPluginCommand("ElysiaJob").setExecutor(new CommandManager());
-        manaRegenerationTask = new ManaRegenerationTask();
-        manaRegenerationTask.runTaskTimerAsynchronously(this, 0, 20);
+        Bukkit.getPluginCommand("ElysiaJob").setTabCompleter(new CommandTabComplete());
+        manaRegenerationTaskId = Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            for (Player player : Bukkit.getOnlinePlayers()){
+                UUID uuid = player.getUniqueId();
+                // 如果玩家的魔法值已经达到最大值，则跳过
+                if (playerDataManager.getPlayerMana(uuid) >= playerDataManager.getPlayerMaxMana(uuid))
+                    return; // 直接返回，不再处理
+                // 更新魔法值，确保不超过最大值
+                int newMana = Math.min(
+                        playerDataManager.getPlayerMana(uuid) + playerDataManager.getPlayerManaRegen(uuid),
+                        playerDataManager.getPlayerMaxMana(uuid)
+                );
+                playerDataManager.setPlayerMana(uuid, newMana);
+            }
+        }, 0L, 20L).getTaskId();
         checkDepend();
+        new HelpCommand().register();
+        new ReloadCommand().register();
+        new SetCommand().register();
+        new TakeCommand().register();
+        new MaxCommand().register();
+        new RegenCommand().register();
+        new AddCommand().register();
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-        manaRegenerationTask.cancel();
+        Bukkit.getScheduler().cancelTask(manaRegenerationTaskId);
     }
     private void createFile() {
         saveDefaultConfig();
@@ -63,16 +86,6 @@ public final class ElysiaJob extends JavaPlugin {
                 Files.createDirectories(directoryPath);
             } catch (IOException e) {
                 throw new UncheckedIOException("Failed to create directory.", e);
-            }
-        }
-    }
-    private static class ManaRegenerationTask extends BukkitRunnable {
-        @Override
-        public void run() {
-            for (Player player : Bukkit.getOnlinePlayers()){
-                UUID uuid = player.getUniqueId();
-                if (playerDataManager.getPlayerMana(uuid) >= playerDataManager.getPlayerMaxMana(uuid)) continue;
-                playerDataManager.setPlayerMana(uuid, Math.min(playerDataManager.getPlayerMana(uuid) + playerDataManager.getPlayerManaRegen(uuid), playerDataManager.getPlayerMaxMana(uuid)));
             }
         }
     }
