@@ -1,13 +1,10 @@
 package com.elysia.elysiajob;
 
-import com.elysia.elysiajob.command.CommandManager;
-import com.elysia.elysiajob.command.CommandTabComplete;
-import com.elysia.elysiajob.command.subcommands.HelpCommand;
-import com.elysia.elysiajob.command.subcommands.ReloadCommand;
-import com.elysia.elysiajob.command.subcommands.manacommands.*;
+import com.elysia.elysiajob.command.handlers.CommandHandler;
 import com.elysia.elysiajob.filemanager.ConfigManager;
 import com.elysia.elysiajob.filemanager.PlayerDataManager;
 import com.elysia.elysiajob.hook.PlaceholderAPIHook;
+import com.elysia.elysiajob.listener.ClientListener;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -40,8 +37,12 @@ public final class ElysiaJob extends JavaPlugin {
         configManager = ConfigManager.getInstance();
         playerDataManager = PlayerDataManager.getInstance();
         configManager.loadConfig();
-        Bukkit.getPluginCommand("ElysiaJob").setExecutor(new CommandManager());
-        Bukkit.getPluginCommand("ElysiaJob").setTabCompleter(new CommandTabComplete());
+//        Bukkit.getPluginCommand("ElysiaJob").setExecutor(new CommandManager());
+//        Bukkit.getPluginCommand("ElysiaJob").setTabCompleter(new CommandTabComplete());
+        Bukkit.getMessenger().registerIncomingPluginChannel(this, "ElysiaJob", new ClientListener());
+        new CommandHandler()
+                // 注册
+                .register(this);
         manaRegenerationTaskId = Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             for (Player player : Bukkit.getOnlinePlayers()){
                 UUID uuid = player.getUniqueId();
@@ -57,13 +58,13 @@ public final class ElysiaJob extends JavaPlugin {
             }
         }, 0L, 20L).getTaskId();
         checkDepend();
-        new HelpCommand().register();
-        new ReloadCommand().register();
-        new SetCommand().register();
-        new TakeCommand().register();
-        new MaxCommand().register();
-        new RegenCommand().register();
-        new AddCommand().register();
+//        new HelpCommand().register();
+//        new ReloadCommand().register();
+//        new SetCommand().register();
+//        new TakeCommand().register();
+//        new MaxCommand().register();
+//        new RegenCommand().register();
+//        new AddCommand().register();
     }
 
     @Override

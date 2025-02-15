@@ -4,3 +4,5 @@ save_timer: 300
 save_tips: true
 default_mana: 100
 default_mana_regen: 5
+default_stamina: 90
+default_stamina_regen: 2
