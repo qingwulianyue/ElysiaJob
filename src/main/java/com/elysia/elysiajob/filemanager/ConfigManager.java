@@ -26,7 +26,9 @@ public class ConfigManager {
                 config.getInt("save_timer"),
                 config.getBoolean("save_tips"),
                 config.getInt("default_mana"),
-                config.getInt("default_mana_regen")
+                config.getInt("default_mana_regen"),
+                config.getInt("default_stamina"),
+                config.getInt("default_stamina_regen")
         );
         logConfigInfoIfDebug();
     }
@@ -38,6 +40,8 @@ public class ConfigManager {
             ElysiaJob.getInstance().getLogger().info("§eSave Tips: §a" + configData.isSaveTips());
             ElysiaJob.getInstance().getLogger().info("§eDefault Mana: §a" + configData.getDefaultMana());
             ElysiaJob.getInstance().getLogger().info("§eDefault Mana Regen: §a" + configData.getDefaultManaRegen());
+            ElysiaJob.getInstance().getLogger().info("§eDefault Stamina: §a" + configData.getDefaultStamina());
+            ElysiaJob.getInstance().getLogger().info("§eDefault Stamina Regen: §a" + configData.getDefaultStaminaRegen());
         }
     }
 }
